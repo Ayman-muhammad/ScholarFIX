@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - ScholarFix{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-6">Welcome back, {{ user.name }}! 👋</h1>
+        <p class="text-muted">Refine your documents with AI-powered assistance.</p>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">Today's Documents</h6>
+                <h2 class="card-title">{{ stats.today_documents }}</h2>
+                <p class="card-text small">{{ stats.documents_left }} remaining today</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">Total Documents</h6>
+                <h2 class="card-title">{{ stats.stats.total_documents or 0 }}</h2>
+                <p class="card-text small">All time</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">Grammar Fixes</h6>
+                <h2 class="card-title">{{ stats.stats.grammar_fixes or 0 }}</h2>
+                <p class="card-text small">Issues resolved</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">Account Type</h6>
+                <h2 class="card-title">{{ user.user_type|title }}</h2>
+                <p class="card-text small">{{ user.max_documents }} docs/day</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Section -->
+<div class="card mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Upload New Document</h5>
+    </div>
+    <div class="card-body">
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="documentFile" class="form-label">Select Document</label>
+                <input class="form-control" type="file" id="documentFile" accept=".docx,.pdf,.txt" required>
+                <div class="form-text">Supported formats: .docx, .pdf, .txt (Max 10MB)</div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="documentMode" class="form-label">Document Type</label>
+                    <select class="form-select" id="documentMode" required>
+                        <option value="academic">Academic (Essay, Thesis)</option>
+                        <option value="cv">CV / Resume</option>
+                        <option value="professional">Professional Report</option>
+                        <option value="personal">Personal Document</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="citationStyle" class="form-label">Citation Style</label>
+                    <select class="form-select" id="citationStyle">
+                        <option value="apa">APA</option>
+                        <option value="mla">MLA</option>
+                        <option value="chicago">Chicago</option>
+                        <option value="harvard">Harvard</option>
+                        <option value="none">None</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Processing Options</label>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="optGrammar" checked>
+                    <label class="form-check-label" for="optGrammar">Grammar & Spelling</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="optClarity" checked>
+                    <label class="form-check-label" for="optClarity">Clarity</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="optTone" checked>
+                    <label class="form-check-label" for="optTone">Tone</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="optFormatting" checked>
+                    <label class="form-check-label" for="optFormatting">Formatting</label>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" id="processBtn">
+                <i class="fas fa-magic me-2"></i>Process Document
+            </button>
+        </form>
+        
+        <div id="processingAlert" class="alert alert-info mt-3 d-none">
+            <div class="d-flex align-items-center">
+                <div class="spinner-border spinner-border-sm me-3" role="status"></div>
+                <div>
+                    <strong>Processing your document...</strong>
+                    <p class="mb-0">This may take a moment. Please wait.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Documents -->
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Documents</h5>
+        <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="card-body">
+        {% if documents %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Document</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                    <tr>
+                        <td>
+                            <i class="fas fa-file-{{ 'word' if doc.original_filename.endswith('.docx') else 'pdf' }} text-primary me-2"></i>
+                            {{ doc.original_filename|truncate(30) }}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'info' if doc.mode == 'academic' else 'success' if doc.mode == 'cv' else 'warning' }}">
+                                {{ doc.mode|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if doc.status == 'completed' else 'warning' }}">
+                                {{ doc.status|title }}
+                            </span>
+                        </td>
+                        <td>{{ doc.created_at[:10] }}</td>
+                        <td>
+                            {% if doc.status == 'completed' %}
+                            <a href="{{ url_for('download_document', file_id=doc.file_id) }}" 
+                               class="btn btn-sm btn-outline-success" title="Download">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-info preview-btn" 
+                                    data-file-id="{{ doc.file_id }}" title="Preview">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+            <h5>No documents yet</h5>
+            <p class="text-muted">Upload your first document to get started!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Document Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="previewContent">
+                    <!-- Preview content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="downloadPreviewBtn">
+                    <i class="fas fa-download me-2"></i>Download
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadForm = document.getElementById('uploadForm');
+    const processBtn = document.getElementById('processBtn');
+    const processingAlert = document.getElementById('processingAlert');
+    
+    uploadForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const fileInput = document.getElementById('documentFile');
+        if (!fileInput.files.length) {
+            alert('Please select a file');
+            return;
+        }
+        
+        // Check daily limit
+        const remaining = {{ stats.documents_left }};
+        if (remaining <= 0) {
+            alert('Daily limit reached. Please upgrade your account or try again tomorrow.');
+            return;
+        }
+        
+        // Disable button and show processing
+        processBtn.disabled = true;
+        processBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+        processingAlert.classList.remove('d-none');
+        
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('mode', document.getElementById('documentMode').value);
+        formData.append('citation_style', document.getElementById('citationStyle').value);
+        formData.append('grammar', document.getElementById('optGrammar').checked);
+        formData.append('clarity', document.getElementById('optClarity').checked);
+        formData.append('tone', document.getElementById('optTone').checked);
+        formData.append('formatting', document.getElementById('optFormatting').checked);
+        
+        try {
+            const response = await fetch('/process', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Show success message
+                processingAlert.className = 'alert alert-success mt-3';
+                processingAlert.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle fa-2x me-3"></i>
+                        <div>
+                            <strong>Document processed successfully!</strong>
+                            <p class="mb-0">
+                                <a href="${result.download_url}" class="alert-link">Download your refined document</a>
+                            </p>
+                        </div>
+                    </div>
+                `;
+                
+                // Reset form
+                uploadForm.reset();
+                
+                // Refresh page after 2 seconds to show new document
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+                
+            } else {
+                throw new Error(result.error || 'Processing failed');
+            }
+            
+        } catch (error) {
+            processingAlert.className = 'alert alert-danger mt-3';
+            processingAlert.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-circle fa-2x me-3"></i>
+                    <div>
+                        <strong>Processing failed</strong>
+                        <p class="mb-0">${error.message}</p>
+                    </div>
+                </div>
+            `;
+        } finally {
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                processBtn.disabled = false;
+                processBtn.innerHTML = '<i class="fas fa-magic me-2"></i>Process Document';
+                processingAlert.classList.add('d-none');
+            }, 3000);
+        }
+    });
+    
+    // Preview button handlers
+    document.querySelectorAll('.preview-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const fileId = this.dataset.fileId;
+            
+            try {
+                const response = await fetch(`/preview/${fileId}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const preview = result.preview;
+                    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+                    
+                    document.getElementById('previewContent').innerHTML = `
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Original</h6>
+                                <div class="border p-3 bg-light rounded mb-3" style="height: 300px; overflow-y: auto;">
+                                    ${preview.original || 'No preview available'}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Refined</h6>
+                                <div class="border p-3 bg-light rounded mb-3" style="height: 300px; overflow-y: auto;">
+                                    ${preview.processed || 'No preview available'}
+                                </div>
+                            </div>
+                        </div>
+                        ${preview.changes ? `
+                        <div class="mt-3">
+                            <h6>Changes Made</h6>
+                            <div class="border p-3 rounded">
+                                <pre class="mb-0">${JSON.stringify(preview.changes, null, 2)}</pre>
+                            </div>
+                        </div>
+                        ` : ''}
+                    `;
+                    
+                    // Set download button
+                    document.getElementById('downloadPreviewBtn').onclick = () => {
+                        window.location.href = `/download/${fileId}`;
+                    };
+                    
+                    modal.show();
+                }
+            } catch (error) {
+                alert('Failed to load preview');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

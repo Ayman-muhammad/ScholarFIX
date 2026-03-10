@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScholarFix - Refine. Don't Rewrite.</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-graduation-cap me-2"></i>
+                <span class="brand-text">ScholarFix</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">How It Works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#pricing">Pricing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary ms-lg-3" href="#upload-section">Try Now</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="hero-title">
+                        Refine. Don't Rewrite.
+                    </h1>
+                    <p class="hero-subtitle">
+                        Transform your documents with AI-powered refinement. 
+                        Perfect for students, professionals, and job seekers.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#upload-section" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-upload me-2"></i>Upload Document
+                        </a>
+                        <a href="#features" class="btn btn-outline-primary btn-lg">
+                            Learn More
+                        </a>
+                    </div>
+                    <div class="hero-stats mt-5">
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <h3>99%</h3>
+                                    <p>Grammar Accuracy</p>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <h3>50%</h3>
+                                    <p>Time Saved</p>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <h3>100%</h3>
+                                    <p>Ethical</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-image">
+                        <div class="document-preview">
+                            <div class="document-original">
+                                <h5><i class="fas fa-file-alt me-2"></i>Original</h5>
+                                <p class="document-text">
+                                    This paper looks at how social media effects young people. 
+                                    Its got some good points but needs work on grammar and stuff.
+                                </p>
+                            </div>
+                            <div class="document-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                            <div class="document-refined">
+                                <h5><i class="fas fa-check-circle me-2"></i>Refined</h5>
+                                <p class="document-text">
+                                    This study examines how social media affects young people. 
+                                    It contains valuable insights but requires grammatical improvements.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section id="upload-section" class="upload-section">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h2>Upload Your Document</h2>
+                <p class="section-subtitle">Refine your document in three simple steps</p>
+            </div>
+            
+            <div class="upload-wizard">
+                <!-- Step 1: Upload -->
+                <div class="step active" id="step1">
+                    <div class="step-header">
+                        <span class="step-number">1</span>
+                        <h4>Upload Document</h4>
+                    </div>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-content">
+                            <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                            <h5>Drag & Drop Your File</h5>
+                            <p class="text-muted">or click to browse</p>
+                            <p class="file-types">
+                                Supports: .docx, .pdf
+                            </p>
+                            <input type="file" id="fileInput" accept=".docx,.pdf" style="display: none;">
+                            <button class="btn btn-outline-primary mt-3" onclick="document.getElementById('fileInput').click()">
+                                Select File
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="selected-file mt-3" id="selectedFile" style="display: none;">
+                        <div class="file-info">
+                            <i class="fas fa-file-word text-primary me-2"></i>
+                            <span id="fileName"></span>
+                            <button class="btn btn-sm btn-outline-danger ms-2" onclick="clearFile()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Configure -->
+                <div class="step" id="step2">
+                    <div class="step-header">
+                        <span class="step-number">2</span>
+                        <h4>Configure Settings</h4>
+                    </div>
+                    
+                    <div class="configuration-form">
+                        <div class="mb-4">
+                            <label class="form-label">Document Type</label>
+                            <div class="mode-selector">
+                                <div class="row">
+                                    <div class="col-md-3 col-6 mb-3">
+                                        <input type="radio" name="documentMode" id="modeAcademic" value="academic" class="mode-input" checked>
+                                        <label for="modeAcademic" class="mode-card">
+                                            <i class="fas fa-graduation-cap mb-2"></i>
+                                            <h6>Academic</h6>
+                                            <p>Essays, research papers, theses</p>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-3">
+                                        <input type="radio" name="documentMode" id="modeCV" value="cv" class="mode-input">
+                                        <label for="modeCV" class="mode-card">
+                                            <i class="fas fa-briefcase mb-2"></i>
+                                            <h6>CV / Resume</h6>
+                                            <p>Job applications, profiles</p>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-3">
+                                        <input type="radio" name="documentMode" id="modeProfessional" value="professional" class="mode-input">
+                                        <label for="modeProfessional" class="mode-card">
+                                            <i class="fas fa-chart-line mb-2"></i>
+                                            <h6>Professional</h6>
+                                            <p>Reports, proposals, emails</p>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-3">
+                                        <input type="radio" name="documentMode" id="modePersonal" value="personal" class="mode-input">
+                                        <label for="modePersonal" class="mode-card">
+                                            <i class="fas fa-user mb-2"></i>
+                                            <h6>Personal</h6>
+                                            <p>Letters, personal documents</p>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Processing Options</label>
+                            <div class="options-grid">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="grammarCheck" checked>
+                                    <label class="form-check-label" for="grammarCheck">
+                                        Grammar & Spelling
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="clarityCheck" checked>
+                                    <label class="form-check-label" for="clarityCheck">
+                                        Clarity Improvement
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="toneCheck" checked>
+                                    <label class="form-check-label" for="toneCheck">
+                                        Tone Adjustment
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="formattingCheck" checked>
+                                    <label class="form-check-label" for="formattingCheck">
+                                        Formatting
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="citationStyle" class="form-label">Citation Style (Academic only)</label>
+                            <select class="form-select" id="citationStyle">
+                                <option value="apa">APA</option>
+                                <option value="harvard">Harvard</option>
+                                <option value="mla">MLA</option>
+                                <option value="chicago">Chicago</option>
+                                <option value="none">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Process -->
+                <div class="step" id="step3">
+                    <div class="step-header">
+                        <span class="step-number">3</span>
+                        <h4>Process & Refine</h4>
+                    </div>
+                    
+                    <div class="processing-area text-center">
+                        <div id="processingState">
+                            <div class="processing-icon mb-4">
+                                <i class="fas fa-cog fa-spin fa-3x"></i>
+                            </div>
+                            <h5>Processing Your Document</h5>
+                            <p>This may take a few moments...</p>
+                            <div class="progress mt-4">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     id="processingProgress" style="width: 0%"></div>
+                            </div>
+                            <p class="text-muted mt-3" id="processingStatus">Initializing...</p>
+                        </div>
+                        
+                        <div id="completionState" style="display: none;">
+                            <div class="completion-icon mb-4">
+                                <i class="fas fa-check-circle fa-3x text-success"></i>
+                            </div>
+                            <h5>Document Refined Successfully!</h5>
+                            <p>Your document has been enhanced and is ready to download.</p>
+                            
+                            <div class="completion-actions mt-4">
+                                <button class="btn btn-success me-3" onclick="downloadDocument()">
+                                    <i class="fas fa-download me-2"></i>Download
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="showPreview()">
+                                    <i class="fas fa-eye me-2"></i>View Preview
+                                </button>
+                            </div>
+                            
+                            <div class="completion-metrics mt-4">
+                                <div class="row">
+                                    <div class="col-md-3 col-6">
+                                        <div class="metric-item">
+                                            <h6 id="grammarFixes">0</h6>
+                                            <p>Grammar Fixes</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6">
+                                        <div class="metric-item">
+                                            <h6 id="clarityImprovements">0</h6>
+                                            <p>Clarity Improvements</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6">
+                                        <div class="metric-item">
+                                            <h6 id="toneAdjustments">0</h6>
+                                            <p>Tone Adjustments</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6">
+                                        <div class="metric-item">
+                                            <h6 id="formattingChanges">0</h6>
+                                            <p>Formatting Changes</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation Buttons -->
+                <div class="step-navigation mt-4">
+                    <button class="btn btn-outline-secondary" id="prevBtn" disabled onclick="prevStep()">
+                        <i class="fas fa-arrow-left me-2"></i>Previous
+                    </button>
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">
+                        Next<i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Preview Modal -->
+    <div class="modal fade" id="previewModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Document Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="preview-container">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="preview-section">
+                                    <h6><i class="fas fa-file-alt me-2"></i>Original Document</h6>
+                                    <div class="preview-content" id="originalPreview">
+                                        Loading original content...
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="preview-section">
+                                    <h6><i class="fas fa-check-circle me-2 text-success"></i>Refined Document</h6>
+                                    <div class="preview-content" id="refinedPreview">
+                                        Loading refined content...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="changes-summary mt-4">
+                            <h6>Changes Made</h6>
+                            <div class="changes-list" id="changesList">
+                                <!-- Changes will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadDocument()">
+                        <i class="fas fa-download me-2"></i>Download Refined Document
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h2>Powerful Features</h2>
+                <p class="section-subtitle">Everything you need to perfect your documents</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-spell-check"></i>
+                        </div>
+                        <h5>Grammar & Spelling</h5>
+                        <p>Advanced grammar checking with context-aware corrections and spelling accuracy.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-bullhorn"></i>
+                        </div>
+                        <h5>Tone Adjustment</h5>
+                        <p>Adapt your writing tone for academic, professional, CV, or personal contexts.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-align-left"></i>
+                        </div>
+                        <h5>Formatting</h5>
+                        <p>Automatic formatting for different document types and citation styles.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h5>Plagiarism Check</h5>
+                        <p>Identify potential plagiarism issues while maintaining originality.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-file-export"></i>
+                        </div>
+                        <h5>Multi-Format Export</h5>
+                        <p>Export refined documents in DOCX, PDF, and other popular formats.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <h5>Ethical Processing</h5>
+                        <p>We refine your work without rewriting it, preserving your original voice.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="footer-brand">
+                        <i class="fas fa-graduation-cap fa-2x me-2"></i>
+                        <h4>ScholarFix</h4>
+                    </div>
+                    <p class="footer-tagline">
+                        Refine. Don't Rewrite.
+                    </p>
+                    <p class="footer-description">
+                        Making every document polished, clear, and professional while preserving originality.
+                    </p>
+                </div>
+                
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h5>Product</h5>
+                    <ul class="footer-links">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#">API</a></li>
+                        <li><a href="#">Updates</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h5>Company</h5>
+                    <ul class="footer-links">
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Blog</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h5>Legal</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                        <li><a href="#">GDPR</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 mb-4">
+                    <h5>Connect</h5>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 ScholarFix. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,839 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - ScholarFix{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <!-- User Profile Card -->
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="avatar-container mb-3">
+                    <div class="avatar-placeholder">
+                        <i class="fas fa-user-circle fa-5x text-primary"></i>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary mt-2" data-bs-toggle="modal" data-bs-target="#avatarModal">
+                        <i class="fas fa-camera me-1"></i>Change
+                    </button>
+                </div>
+                
+                <h4 class="card-title mb-1">{{ user.name }}</h4>
+                <p class="text-muted mb-3">{{ user.email }}</p>
+                
+                <div class="user-badges mb-3">
+                    <span class="badge bg-{{ 'success' if user.user_type == 'premium' else 'primary' if user.user_type == 'professional' else 'info' if user.user_type == 'student' else 'secondary' }}">
+                        <i class="fas fa-{{ 'crown' if user.user_type == 'premium' else 'briefcase' if user.user_type == 'professional' else 'graduation-cap' if user.user_type == 'student' else 'user' }} me-1"></i>
+                        {{ user.user_type|title }} User
+                    </span>
+                    
+                    {% if user.is_active %}
+                    <span class="badge bg-success">
+                        <i class="fas fa-check-circle me-1"></i>Active
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <div class="user-stats">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h5 class="mb-1">{{ user.documents_count or 0 }}</h5>
+                            <small class="text-muted">Documents</small>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="mb-1">{{ user.max_documents }}</h5>
+                            <small class="text-muted">Daily Limit</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <small class="text-muted">
+                    <i class="fas fa-calendar-alt me-1"></i>
+                    Member since {{ user.created_at[:10] if user.created_at else 'N/A' }}
+                </small>
+                <br>
+                <small class="text-muted">
+                    <i class="fas fa-sign-in-alt me-1"></i>
+                    Last login: {{ user.last_login[:10] if user.last_login else 'Never' }}
+                </small>
+            </div>
+        </div>
+        
+        <!-- API Key Card -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-key me-2"></i>API Access
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if user.api_key %}
+                <div class="mb-3">
+                    <label class="form-label small text-muted mb-1">API Key</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control form-control-sm" id="apiKey" value="{{ user.api_key }}" readonly>
+                        <button class="btn btn-outline-secondary btn-sm" type="button" onclick="copyApiKey()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted">Keep this key secret</small>
+                </div>
+                
+                <div class="d-grid">
+                    <button class="btn btn-outline-danger btn-sm" onclick="regenerateApiKey()">
+                        <i class="fas fa-redo me-1"></i>Regenerate Key
+                    </button>
+                </div>
+                {% else %}
+                <p class="text-muted mb-3">No API key generated yet.</p>
+                <div class="d-grid">
+                    <button class="btn btn-primary btn-sm" onclick="generateApiKey()">
+                        <i class="fas fa-plus me-1"></i>Generate API Key
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <!-- Edit Profile Form -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-edit me-2"></i>Edit Profile
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="profileForm" method="POST" action="{{ url_for('update_profile') }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" value="{{ user.email }}" disabled>
+                            <small class="text-muted">Contact support to change email</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="user_type" class="form-label">Account Type</label>
+                        <select class="form-select" id="user_type" disabled>
+                            <option>{{ user.user_type|title }}</option>
+                        </select>
+                        <small class="text-muted">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#upgradeModal">Upgrade your account</a> for more features
+                        </small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Account Settings</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                            <label class="form-check-label" for="emailNotifications">
+                                Email notifications
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="newsletter" checked>
+                            <label class="form-check-label" for="newsletter">
+                                Newsletter updates
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                        
+                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#passwordModal">
+                            <i class="fas fa-lock me-2"></i>Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Account Statistics -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Usage Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="stat-card">
+                            <div class="stat-value">{{ user.documents_count or 0 }}</div>
+                            <div class="stat-label">Total Documents Processed</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="stat-card">
+                            <div class="stat-value">{{ user.max_documents }}</div>
+                            <div class="stat-label">Daily Document Limit</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="stat-card">
+                            <div class="stat-value" id="todayCount">0</div>
+                            <div class="stat-label">Documents Today</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="stat-card">
+                            <div class="stat-value" id="remainingCount">{{ user.max_documents }}</div>
+                            <div class="stat-label">Remaining Today</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress mb-3" style="height: 10px;">
+                    <div id="usageProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+                <small class="text-muted">Daily usage resets at midnight</small>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Recent Activity
+                </h5>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="activity-timeline">
+                    {% if documents %}
+                        {% for doc in documents[:5] %}
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-file-{{ 'word' if doc.original_filename.endswith('.docx') else 'pdf' if doc.original_filename.endswith('.pdf') else 'alt' }}"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">
+                                    Processed "{{ doc.original_filename|truncate(30) }}"
+                                </div>
+                                <div class="activity-meta">
+                                    <span class="text-muted">
+                                        {{ doc.created_at[:16] if doc.created_at else 'N/A' }}
+                                    </span>
+                                    <span class="badge bg-{{ 'success' if doc.status == 'completed' else 'warning' }} ms-2">
+                                        {{ doc.status|title }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No recent activity</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Avatar Modal -->
+<div class="modal fade" id="avatarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Profile Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div class="avatar-preview mb-3">
+                        <i class="fas fa-user-circle fa-5x text-primary"></i>
+                    </div>
+                    <p class="text-muted">Select a new profile picture</p>
+                </div>
+                
+                <div class="avatar-options">
+                    <div class="row text-center">
+                        <div class="col-3 mb-3">
+                            <div class="avatar-option" onclick="selectAvatar(1)">
+                                <i class="fas fa-user-circle fa-3x"></i>
+                            </div>
+                        </div>
+                        <div class="col-3 mb-3">
+                            <div class="avatar-option" onclick="selectAvatar(2)">
+                                <i class="fas fa-user-graduate fa-3x"></i>
+                            </div>
+                        </div>
+                        <div class="col-3 mb-3">
+                            <div class="avatar-option" onclick="selectAvatar(3)">
+                                <i class="fas fa-user-tie fa-3x"></i>
+                            </div>
+                        </div>
+                        <div class="col-3 mb-3">
+                            <div class="avatar-option" onclick="selectAvatar(4)">
+                                <i class="fas fa-user-astronaut fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="customAvatar" class="form-label">Or upload custom image</label>
+                    <input class="form-control" type="file" id="customAvatar" accept="image/*">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveAvatar()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Change Modal -->
+<div class="modal fade" id="passwordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="passwordForm">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="currentPassword" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" required>
+                        <div class="password-strength mt-2">
+                            <div class="progress" style="height: 5px;">
+                                <div id="passwordStrength" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small id="passwordFeedback" class="text-muted"></small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" required>
+                        <div id="passwordMatch" class="invalid-feedback">Passwords do not match</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="changePassword()">Change Password</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upgrade Modal -->
+<div class="modal fade" id="upgradeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Upgrade Your Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Professional</h5>
+                                <div class="price display-4">$9.99</div>
+                                <div class="text-muted mb-4">per month</div>
+                                
+                                <ul class="list-unstyled mb-4">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        20 documents/day
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Priority processing
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        PDF export
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        API access
+                                    </li>
+                                </ul>
+                                
+                                <button class="btn btn-primary w-100">Upgrade to Professional</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 border-primary">
+                            <div class="card-body text-center">
+                                <div class="badge bg-primary mb-3">Most Popular</div>
+                                <h5 class="card-title">Premium</h5>
+                                <div class="price display-4">$19.99</div>
+                                <div class="text-muted mb-4">per month</div>
+                                
+                                <ul class="list-unstyled mb-4">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        100 documents/day
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        All Professional features
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Advanced formatting
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Priority support
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Team collaboration
+                                    </li>
+                                </ul>
+                                
+                                <button class="btn btn-primary w-100">Upgrade to Premium</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <p class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        All plans include basic grammar checking and formatting
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.avatar-container {
+    position: relative;
+}
+
+.avatar-placeholder {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background-color: var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-option {
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.avatar-option:hover {
+    background-color: var(--gray-200);
+}
+
+.avatar-option.selected {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.stat-card {
+    background: var(--gray-100);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.activity-timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.activity-timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--gray-300);
+}
+
+.activity-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.activity-icon {
+    position: absolute;
+    left: -30px;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: white;
+    border: 2px solid var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+}
+
+.activity-content {
+    padding-left: 10px;
+}
+
+.activity-title {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.activity-meta {
+    font-size: 0.875rem;
+}
+
+.price {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.password-strength .progress-bar {
+    transition: width 0.3s ease;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load usage statistics
+    loadUsageStats();
+    
+    // Password strength checker
+    const newPasswordInput = document.getElementById('newPassword');
+    if (newPasswordInput) {
+        newPasswordInput.addEventListener('input', checkPasswordStrength);
+    }
+    
+    // Password confirmation checker
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    if (confirmPasswordInput) {
+        confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+    }
+});
+
+async function loadUsageStats() {
+    try {
+        const response = await fetch('/api/stats');
+        const result = await response.json();
+        
+        if (result.success) {
+            const stats = result.stats;
+            
+            // Update today's count
+            const todayEl = document.getElementById('todayCount');
+            if (todayEl && stats.today_documents !== undefined) {
+                todayEl.textContent = stats.today_documents;
+            }
+            
+            // Update remaining count
+            const remainingEl = document.getElementById('remainingCount');
+            if (remainingEl && stats.documents_left !== undefined) {
+                remainingEl.textContent = stats.documents_left;
+            }
+            
+            // Update progress bar
+            const progressEl = document.getElementById('usageProgress');
+            if (progressEl && stats.today_documents !== undefined && stats.max_documents !== undefined) {
+                const progress = (stats.today_documents / stats.max_documents) * 100;
+                progressEl.style.width = `${Math.min(progress, 100)}%`;
+                
+                // Set color based on usage
+                if (progress >= 80) {
+                    progressEl.className = 'progress-bar bg-danger';
+                } else if (progress >= 50) {
+                    progressEl.className = 'progress-bar bg-warning';
+                } else {
+                    progressEl.className = 'progress-bar bg-success';
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error loading usage stats:', error);
+    }
+}
+
+function copyApiKey() {
+    const apiKeyInput = document.getElementById('apiKey');
+    if (apiKeyInput) {
+        apiKeyInput.select();
+        apiKeyInput.setSelectionRange(0, 99999); // For mobile devices
+        
+        try {
+            document.execCommand('copy');
+            showAlert('API key copied to clipboard!', 'success');
+        } catch (err) {
+            console.error('Failed to copy:', err);
+            showAlert('Failed to copy API key', 'danger');
+        }
+    }
+}
+
+async function regenerateApiKey() {
+    if (!confirm('Are you sure? This will invalidate your current API key.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/regenerate_key', {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert('API key regenerated successfully!', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            throw new Error(result.error || 'Failed to regenerate key');
+        }
+    } catch (error) {
+        console.error('Error regenerating API key:', error);
+        showAlert(`Error: ${error.message}`, 'danger');
+    }
+}
+
+async function generateApiKey() {
+    try {
+        const response = await fetch('/api/generate_key', {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert('API key generated successfully!', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            throw new Error(result.error || 'Failed to generate key');
+        }
+    } catch (error) {
+        console.error('Error generating API key:', error);
+        showAlert(`Error: ${error.message}`, 'danger');
+    }
+}
+
+let selectedAvatar = 1;
+
+function selectAvatar(number) {
+    selectedAvatar = number;
+    
+    // Remove selected class from all options
+    document.querySelectorAll('.avatar-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    // Add selected class to clicked option
+    event.target.closest('.avatar-option').classList.add('selected');
+}
+
+function saveAvatar() {
+    // In production, implement avatar saving logic
+    showAlert('Avatar updated successfully!', 'success');
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('avatarModal'));
+    modal.hide();
+}
+
+function checkPasswordStrength() {
+    const password = document.getElementById('newPassword').value;
+    const strengthBar = document.getElementById('passwordStrength');
+    const feedback = document.getElementById('passwordFeedback');
+    
+    let strength = 0;
+    let messages = [];
+    
+    // Length check
+    if (password.length >= 8) strength += 25;
+    else messages.push('At least 8 characters');
+    
+    // Lowercase check
+    if (/[a-z]/.test(password)) strength += 25;
+    else messages.push('Lowercase letters');
+    
+    // Uppercase check
+    if (/[A-Z]/.test(password)) strength += 25;
+    else messages.push('Uppercase letters');
+    
+    // Number/Special character check
+    if (/[0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) strength += 25;
+    else messages.push('Numbers or special characters');
+    
+    // Update progress bar
+    strengthBar.style.width = `${strength}%`;
+    
+    // Update color and feedback
+    if (strength < 50) {
+        strengthBar.className = 'progress-bar bg-danger';
+        feedback.textContent = 'Weak password. Add: ' + messages.join(', ');
+        feedback.className = 'text-danger';
+    } else if (strength < 75) {
+        strengthBar.className = 'progress-bar bg-warning';
+        feedback.textContent = 'Moderate password';
+        feedback.className = 'text-warning';
+    } else {
+        strengthBar.className = 'progress-bar bg-success';
+        feedback.textContent = 'Strong password!';
+        feedback.className = 'text-success';
+    }
+}
+
+function checkPasswordMatch() {
+    const password = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const matchFeedback = document.getElementById('passwordMatch');
+    
+    if (confirmPassword && password !== confirmPassword) {
+        matchFeedback.style.display = 'block';
+        document.getElementById('confirmPassword').classList.add('is-invalid');
+    } else {
+        matchFeedback.style.display = 'none';
+        document.getElementById('confirmPassword').classList.remove('is-invalid');
+    }
+}
+
+async function changePassword() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    // Validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        showAlert('Please fill all password fields', 'warning');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        showAlert('New passwords do not match', 'danger');
+        return;
+    }
+    
+    if (newPassword.length < 8) {
+        showAlert('Password must be at least 8 characters long', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/change_password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                current_password: currentPassword,
+                new_password: newPassword
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert('Password changed successfully!', 'success');
+            
+            // Close modal and reset form
+            const modal = bootstrap.Modal.getInstance(document.getElementById('passwordModal'));
+            modal.hide();
+            
+            document.getElementById('passwordForm').reset();
+            document.getElementById('passwordStrength').style.width = '0%';
+            document.getElementById('passwordFeedback').textContent = '';
+        } else {
+            throw new Error(result.error || 'Failed to change password');
+        }
+    } catch (error) {
+        console.error('Error changing password:', error);
+        showAlert(`Error: ${error.message}`, 'danger');
+    }
+}
+
+function showAlert(message, type = 'info') {
+    // Remove existing alerts
+    const existingAlerts = document.querySelectorAll('.alert-dismissible');
+    existingAlerts.forEach(alert => {
+        const bsAlert = new bootstrap.Alert(alert);
+        bsAlert.close();
+    });
+    
+    // Create alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+    alertDiv.style.zIndex = '9999';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            const bsAlert = new bootstrap.Alert(alertDiv);
+            bsAlert.close();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}
