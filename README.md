@@ -272,7 +272,7 @@ This project is distributed under the **MIT License**, allowing open use, modifi
 
 **EKALALE LOKAALE SIMON**
 Full-Stack Software Engineer
-Computer Science Student
+
 
 GitHub
 [https://github.com/Ayman-muhammad](https://github.com/Ayman-muhammad)
