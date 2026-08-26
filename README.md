@@ -917,7 +917,7 @@ See the [LICENSE](LICENSE) file for more information.
 
 # 👨‍💻 Author
 
-## EKALALE LOKAALE SIMON
+## EKALALE LOKAALE (AYMAN)
 
 **Full-Stack Software Engineer**
 
