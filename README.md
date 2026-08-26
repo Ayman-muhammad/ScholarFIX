@@ -443,7 +443,7 @@ ScholarFix is designed to support a modular backend architecture using technolog
 
 * Node.js
 * Express.js
-* PHP
+* Python
 
 The backend should remain independent from the presentation layer.
 
