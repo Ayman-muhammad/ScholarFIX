@@ -8,6 +8,8 @@
 
 ## Overview
 
+<img src="Screenshot 2026-08-26 185844.png"
+
 ScholarFix is an AI-powered document refinement platform designed to help students, professionals, and job seekers improve the **clarity, grammar, tone, and formatting of written documents** while preserving the author’s original intent and voice.
 
 Unlike traditional AI writing tools that generate or rewrite entire text, ScholarFix focuses on **ethical AI-assisted editing**. The system enhances existing content rather than replacing it, ensuring authenticity while improving readability and professionalism.
